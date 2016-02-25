@@ -40,11 +40,7 @@ make install
 ## Using Androguard module
 Androguard module is ready to use with Koodous reports, hence we provide an script called **download_androguard_report.py** (inside this repository) to get this reports automatically.
 
-- First you need a Koodous's API token. Create your account, if you don't have one, and access your profile ([https://koodous.com/settings/profile](https://koodous.com/settings/profile)) to get it. Edit **download_androguard_report.py** with your API token.
-```
-TOKEN = 'HERE'
-```
-- Use the script with the sha256 of the sample that you refer, in this example is d8adb784d08a951ebacf2491442cf90d21c20192085e44d1cd22e2b6bdd4ef5f:
+- Use the script with the **sha256** of the sample that you refer, in this example is d8adb784d08a951ebacf2491442cf90d21c20192085e44d1cd22e2b6bdd4ef5f:
 ```Shell
 $ python download_androguard_report.py -s d8adb784d08a951ebacf2491442cf90d21c20192085e44d1cd22e2b6bdd4ef5f
 
