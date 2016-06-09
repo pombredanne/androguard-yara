@@ -16,7 +16,7 @@ limitations under the License.
 
 /*
   Changelog:
-    - 2016/06/09: Start changelog
+    - 2016/06/09: Start changelog and add funtions for "filters"
 */
 
 #include <string.h>
@@ -288,6 +288,53 @@ define_function(service_lookup_string)
 }
 
 /*
+  Function to detect filters (with regex)
+*/
+define_function(filter_lookup_regex)
+{
+  YR_OBJECT* filter_obj = get_object(module(), "filters");
+  json_t* list = (json_t*) filter_obj->data;
+
+  uint64_t result = 0;
+  size_t index;
+  json_t* value;
+
+  json_array_foreach(list, index, value)
+  {
+    //printf("%s\n", json_string_value(value));
+    if (yr_re_match(regexp_argument(1), json_string_value(value)) > 0)
+    {
+      result = 1;
+      break;
+    }
+  }
+  return_integer(result);
+}
+
+/*
+  Function to detect filters (with string)
+*/
+define_function(filter_lookup_string)
+{
+  YR_OBJECT* filter_obj = get_object(module(), "filters");
+  json_t* list = (json_t*) filter_obj->data;
+
+  uint64_t result = 0;
+  size_t index;
+  json_t* value;
+
+  json_array_foreach(list, index, value)
+  {
+    if (strcasecmp(string_argument(1), json_string_value(value)) == 0)
+    {
+      result = 1;
+      break;
+    }
+  }
+  return_integer(result);
+}
+
+/*
   Function to detect receivers (with regex)
 */
 define_function(receiver_lookup_regex)
@@ -484,8 +531,11 @@ begin_declarations;
 
   declare_function("main_activity", "r", "i", main_activity_lookup);
 
-  declare_function("service", "r", "i", service_lookup_regex);  
-  declare_function("service", "s", "i", service_lookup_string);  
+  declare_function("service", "r", "i", service_lookup_regex);
+  declare_function("service", "s", "i", service_lookup_string);
+
+  declare_function("filter", "r", "i", filter_lookup_regex);
+  declare_function("filter", "s", "i", filter_lookup_string);
 
   declare_function("package_name", "r", "i", package_name_lookup_regex);
   declare_function("package_name", "s", "i", package_name_lookup_string);
@@ -527,6 +577,7 @@ int module_load(
   YR_OBJECT* appname_obj = NULL;
   YR_OBJECT* certificate_obj = NULL;
   YR_OBJECT* service_obj = NULL;
+  YR_OBJECT* filter_obj = NULL;
   YR_OBJECT* receiver_obj = NULL;
   YR_OBJECT* url_obj = NULL;
   struct permissions *permissions_struct = NULL;
@@ -537,7 +588,6 @@ int module_load(
   json_t* json = NULL;
 
   /* End definitions */
-
   if (module_data == NULL)
     return ERROR_SUCCESS;
 
@@ -558,6 +608,7 @@ int module_load(
   appname_obj = get_object(module_object, "app_name");
   certificate_obj = get_object(module_object, "certificate");
   service_obj = get_object(module_object, "service");
+  filter_obj = get_object(module_object, "filter");
   receiver_obj = get_object(module_object, "receiver");
   url_obj = get_object(module_object, "url");
 
@@ -591,6 +642,7 @@ int module_load(
   certificate_obj->data = json_object_get(json, "certificate");
   activity_obj->data = json_object_get(json, "activities");
   service_obj->data = json_object_get(json, "services");
+  filter_obj->data = json_object_get(json, "filters");
   receiver_obj->data = json_object_get(json, "receivers");
   url_obj->data = json_object_get(json, "urls");
 
@@ -628,7 +680,6 @@ int module_unload(YR_OBJECT* module)
   YR_OBJECT* obj;
   if (module->data != NULL)
     json_decref((json_t*) module->data);
-
 
   //Free memory allocated in module load
   obj = get_object(module, "permission");
