@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/*
+  Changelog:
+    - 2016/06/09: Start changelog
+*/
+
 #include <string.h>
 #include <jansson.h>
 
