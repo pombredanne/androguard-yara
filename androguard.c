@@ -292,7 +292,7 @@ define_function(service_lookup_string)
 */
 define_function(filter_lookup_regex)
 {
-  YR_OBJECT* filter_obj = get_object(module(), "filters");
+  YR_OBJECT* filter_obj = get_object(module(), "filter");
   json_t* list = (json_t*) filter_obj->data;
 
   uint64_t result = 0;
@@ -316,7 +316,7 @@ define_function(filter_lookup_regex)
 */
 define_function(filter_lookup_string)
 {
-  YR_OBJECT* filter_obj = get_object(module(), "filters");
+  YR_OBJECT* filter_obj = get_object(module(), "filter");
   json_t* list = (json_t*) filter_obj->data;
 
   uint64_t result = 0;
