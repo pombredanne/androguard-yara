@@ -17,6 +17,7 @@ limitations under the License.
 /*
   Changelog:
     - 2016/06/09: Start changelog and add funtions for "filters"
+    - 2016/06/16: Hotfix min/max/target sdk version
 */
 
 #include <string.h>
@@ -534,8 +535,8 @@ begin_declarations;
   declare_function("service", "r", "i", service_lookup_regex);
   declare_function("service", "s", "i", service_lookup_string);
 
-  declare_function("filter", "r", "i", filter_lookup_regex);
-  declare_function("filter", "s", "i", filter_lookup_string);
+  declare_function("filter", "r", "i", filter_lookup_regex);  
+  declare_function("filter", "s", "i", filter_lookup_string);  
 
   declare_function("package_name", "r", "i", package_name_lookup_regex);
   declare_function("package_name", "s", "i", package_name_lookup_string);
@@ -615,26 +616,32 @@ int module_load(
 
   /* Set SDK versions
      MIN_SDK_VERSION */
-  str_val = json_string_value(json_object_get(json, "min_sdk_version"));
   version = 0;
+  str_val = json_string_value(json_object_get(json, "min_sdk_version"));
   if (str_val) {
     version = atoi(str_val);
+  } else {
+    version = json_integer_value(json_object_get(json, "min_sdk_version"));
   }
   set_integer(version, module_object, "min_sdk");
 
   /* MAX_SDK_VERSION */
-  str_val = json_string_value(json_object_get(json, "max_sdk_version"));
   version = 0;
+  str_val = json_string_value(json_object_get(json, "max_sdk_version"));
   if (str_val) {
     version = atoi(str_val);
+  } else {
+    version = json_integer_value(json_object_get(json, "max_sdk_version"));
   }
   set_integer(version, module_object, "max_sdk");
 
   /* TARGET_SDK_VERSION */
-  str_val = json_string_value(json_object_get(json, "target_sdk_version"));
   version = 0;
+  str_val = json_string_value(json_object_get(json, "target_sdk_version"));
   if (str_val) {
     version = atoi(str_val);
+  } else {
+    version = json_integer_value(json_object_get(json, "target_sdk_version"));
   }
   set_integer(version, module_object, "target_sdk");
 
