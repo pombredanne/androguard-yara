@@ -25,7 +25,8 @@ before_install:
   - sudo make install
   - sudo ldconfig
   - cd ../
-
+# Download requirements.txt
+  - sudo pip install -r requirements.txt
 script:
   - python download_androguard_report.py -s d8adb784d08a951ebacf2491442cf90d21c20192085e44d1cd22e2b6bdd4ef5f
   - echo "import \"androguard\" rule test { condition: androguard.package_name(\"com.palasandoreki.hsa2\") }" > rule.yar
