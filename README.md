@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Koodous/androguard-yara.svg)](https://travis-ci.org/Koodous/androguard-yara)
+
 #Androguard module for Yara
 This module for Yara is part of the Koodous project [https://koodous.com](https://koodous.com) and it integrates static APK analysis with Yara. You can use it to find APKs by package name, permissions or API level, etc. You can find the documentation for this module in the Koodous documentation's site: [http://docs.koodous.com/yara/androguard/](http://docs.koodous.com/yara/androguard/)
 
@@ -40,11 +42,7 @@ make install
 ## Using Androguard module
 Androguard module is ready to use with Koodous reports, hence we provide an script called **download_androguard_report.py** (inside this repository) to get this reports automatically.
 
-- First you need a Koodous's API token. Create your account, if you don't have one, and access your profile ([https://koodous.com/settings/profile](https://koodous.com/settings/profile)) to get it. Edit **download_androguard_report.py** with your API token.
-```
-TOKEN = 'HERE'
-```
-- Use the script with the sha256 of the sample that you refer, in this example is d8adb784d08a951ebacf2491442cf90d21c20192085e44d1cd22e2b6bdd4ef5f:
+- Use the script with the **sha256** of the sample that you refer, in this example is d8adb784d08a951ebacf2491442cf90d21c20192085e44d1cd22e2b6bdd4ef5f:
 ```Shell
 $ python download_androguard_report.py -s d8adb784d08a951ebacf2491442cf90d21c20192085e44d1cd22e2b6bdd4ef5f
 
