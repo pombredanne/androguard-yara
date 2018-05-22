@@ -18,10 +18,12 @@ limitations under the License.
   Changelog:
     - 2016/06/09: Start changelog and add funtions for "filters"
     - 2016/06/16: Hotfix min/max/target sdk version
+    - 2016/12/12: Added certificate.not_before and certificate.not_after functions
+    - 2017/01/11: Added displayed_version functions
 */
 
-#include <string.h>
 #include <jansson.h>
+#include <string.h>
 
 
 #include <yara/re.h>
@@ -77,6 +79,100 @@ void remove_colon(const char* input, char* output) {
       output[pos_out++] = input[i];
     }
   }
+}
+
+/*
+  Function to detect certificate.not_before (with regex)
+*/
+define_function(certificate_not_before_lookup_regex)
+{
+  YR_OBJECT* obj = parent();
+  char *value = NULL;
+  uint64_t result = 0;
+  json_t *val;
+
+  val = json_object_get(obj->data, "not_before");
+  if (val) {
+    value = (char *)json_string_value(val);
+  }
+
+  if (value) {
+    if (yr_re_match(regexp_argument(1), value) > 0) {
+      result = 1;
+    }
+  }
+
+  return_integer(result);
+}
+
+/*
+  Function to detect certificate.not_before (with string)
+*/
+define_function(certificate_not_before_lookup_string)
+{
+  YR_OBJECT* obj = parent();
+  char *value = NULL;
+  uint64_t result = 0;
+  json_t *val;
+  val = json_object_get(obj->data, "not_before");
+
+  if (val != NULL) {
+    value = (char *)json_string_value(val);    
+  }
+
+  if (value != NULL) {
+    if (strcasecmp(string_argument(1), value) == 0) {
+      result = 1;
+    }
+  }
+
+  return_integer(result);
+}
+
+/*
+  Function to detect certificate.not_after (with regex)
+*/
+define_function(certificate_not_after_lookup_regex)
+{
+  YR_OBJECT* obj = parent();
+  char *value = NULL;
+  uint64_t result = 0;
+  json_t *val;
+
+  val = json_object_get(obj->data, "not_after");
+  if (val) {
+    value = (char *)json_string_value(val);
+  }
+
+  if (value) {
+    if (yr_re_match(regexp_argument(1), value) > 0) {
+      result = 1;
+    }
+  }
+
+  return_integer(result);
+}
+
+/*
+  Function to detect certificate.not_after (with string)
+*/
+define_function(certificate_not_after_lookup_string)
+{
+  YR_OBJECT* obj = parent();
+  char *value = NULL;
+  uint64_t result = 0;
+  json_t *val;
+  val = json_object_get(obj->data, "not_after");
+
+  if (val != NULL) {
+    value = (char *)json_string_value(val);    
+  }
+  if (value != NULL) {
+    if (strcasecmp(string_argument(1), value) == 0) {
+      result = 1;
+    }
+  }
+  return_integer(result);
 }
 
 /*
@@ -165,6 +261,8 @@ define_function(permission_lookup)
   struct permissions *a;
 
   a = obj->data;
+  if (a == NULL) { return_integer(0); }
+  
   json_t* list_perms = (json_t*) a->permissions;
   json_t* list_new_perms = (json_t*) a->new_permissions;
 
@@ -208,7 +306,6 @@ define_function(activity_lookup_regex)
 
   json_array_foreach(list, index, value)
   {
-    //printf("%s\n", json_string_value(value));
     if (yr_re_match(regexp_argument(1), json_string_value(value)) > 0)
     {
       result = 1;
@@ -255,7 +352,6 @@ define_function(service_lookup_regex)
 
   json_array_foreach(list, index, value)
   {
-    //printf("%s\n", json_string_value(value));
     if (yr_re_match(regexp_argument(1), json_string_value(value)) > 0)
     {
       result = 1;
@@ -302,7 +398,6 @@ define_function(filter_lookup_regex)
 
   json_array_foreach(list, index, value)
   {
-    //printf("%s\n", json_string_value(value));
     if (yr_re_match(regexp_argument(1), json_string_value(value)) > 0)
     {
       result = 1;
@@ -382,6 +477,43 @@ define_function(receiver_lookup_string)
 }
 
 /*
+  Function to detect displayed version (with regex)
+*/
+define_function(displayed_version_lookup_regex)
+{
+  YR_OBJECT* obj = get_object(module(), "displayed_version");
+  char* value = obj->data;
+  uint64_t result = 0;
+
+  if (value) {
+    if (yr_re_match(regexp_argument(1), value) > 0) {
+      result = 1;
+    }
+  }
+ 
+  return_integer(result);
+}
+
+/*
+  Function to detect displayed version (with string)
+*/
+define_function(displayed_version_lookup_string)
+{
+  YR_OBJECT* obj = get_object(module(), "displayed_version");
+  char* value = obj->data;
+  uint64_t result = 0;
+
+  if (value) {
+    if (strcasecmp(string_argument(1), value) == 0) {
+      result = 1;
+    }
+  }
+ 
+  return_integer(result);
+}
+
+
+/*
   Function to detect url (with regex)
 */
 define_function(url_lookup_regex)
@@ -395,7 +527,6 @@ define_function(url_lookup_regex)
 
   json_array_foreach(list, index, value)
   {
-    //printf("%s\n", json_string_value(value));
     if (yr_re_match(regexp_argument(1), json_string_value(value)) > 0)
     {
       result = 1;
@@ -508,11 +639,18 @@ begin_declarations;
     declare_function("issuer", "r", "i", certificate_issuer_lookup);
     declare_function("subject", "r", "i", certificate_subject_lookup);
     declare_function("sha1", "s", "i", certificate_sha1_lookup);
+    declare_function("not_after", "r", "i", certificate_not_after_lookup_regex);
+    declare_function("not_after", "s", "i", certificate_not_after_lookup_string);
+    declare_function("not_before", "r", "i", certificate_not_before_lookup_regex);
+    declare_function("not_before", "s", "i", certificate_not_before_lookup_string);
   end_struct("certificate");
   
   declare_integer("min_sdk");
   declare_integer("max_sdk");
   declare_integer("target_sdk");
+
+  declare_function("displayed_version", "r", "i", displayed_version_lookup_regex);
+  declare_function("displayed_version", "s", "i", displayed_version_lookup_string);
 
   declare_function("url", "r", "i", url_lookup_regex);
   declare_function("url", "s", "i", url_lookup_string);
@@ -581,6 +719,7 @@ int module_load(
   YR_OBJECT* filter_obj = NULL;
   YR_OBJECT* receiver_obj = NULL;
   YR_OBJECT* url_obj = NULL;
+  YR_OBJECT* displayed_version_obj = NULL;
   struct permissions *permissions_struct = NULL;
 
   int version, perms_number;
@@ -612,6 +751,7 @@ int module_load(
   filter_obj = get_object(module_object, "filter");
   receiver_obj = get_object(module_object, "receiver");
   url_obj = get_object(module_object, "url");
+  displayed_version_obj = get_object(module_object, "displayed_version");
 
 
   /* Set SDK versions
@@ -660,6 +800,10 @@ int module_load(
   /* Extract app_name */
   appname_obj->data = (char *)json_string_value(
                                     json_object_get(json, "app_name"));
+
+  /* Extract displayed_version */
+  displayed_version_obj->data = (char *)json_string_value(
+                                    json_object_get(json, "displayed_version"));  
 
   /* Extract package_name */
   package_name_obj->data = (char *)json_string_value(
